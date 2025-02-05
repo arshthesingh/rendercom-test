@@ -20,7 +20,6 @@ def register_user():
     username = data.get("username")
     password = data.get("password")
 
-    # Validating input
     if not username or not password:
         return jsonify({"error": "Username and password are required"}), 400
 

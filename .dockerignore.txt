@@ -1,0 +1,22 @@
+# Byte-compiled / optimized / DLL files
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+venv/
+env/
+
+# Local environment variables file (if you don't want to include it)
+.env
+
+# OS files
+.DS_Store
+
+# Logs and temporary files
+*.log
+tmp/
+
+# Instance folder (if you use one and want to exclude it)
+instance/

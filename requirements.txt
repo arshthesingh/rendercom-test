@@ -11,3 +11,9 @@ pandas
 scikit-learn
 pytest
 pytest-flask
+flake8
+black
+sentence-transformers
+vaderSentiment
+pandas
+scikit-learn

@@ -44,8 +44,8 @@ def create_app():
     app.register_blueprint(recommendations_blueprint, url_prefix="/api")
     app.register_blueprint(api)
 
-    SWAGGER_URL = "/swagger"  # Swagger UI endpoint
-    API_URL = "/static/swagger.yaml"  # file location
+    SWAGGER_URL = "/swagger"  
+    API_URL = "/static/swagger.yaml"  
     swagger_ui_blueprint = get_swaggerui_blueprint(SWAGGER_URL, API_URL)
     app.register_blueprint(swagger_ui_blueprint, url_prefix=SWAGGER_URL)
 

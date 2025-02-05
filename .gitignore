@@ -4,10 +4,10 @@
 # Ignore the specific SQLite database file
 instance/site.db
 
-# Or, ignore all `.db` files in the `instance` folder
+# Or, ignore all .db files in the instance folder
 instance/*.db
 
-# Ignore the entire `instance/` folder (if you want to ignore everything in it)
+# Ignore the entire `instance/` folder
 instance/
 
 
@@ -18,5 +18,5 @@ __pycache__/
 # Environment variables
 .env
 
-# Node.js modules (if applicable)
+# Node.js modules
 node_modules/

@@ -3,7 +3,7 @@ from flask_login import login_user, logout_user, current_user, login_required
 from flask_jwt_extended import jwt_required, create_access_token, get_jwt_identity
 from app import db, bcrypt
 from app.models import User, Watchlist
-from app.movie_recommendation import get_movie_recommendations
+# from app.movie_recommendation import get_movie_recommendations
 
 from flask_cors import CORS
 
@@ -25,7 +25,7 @@ if __name__ == "__main__":
     app.run(debug=True)
 
 
-# Route to serve Swagger YAML file
+# Route serving Swagger YAML file
 @app.route("/static/swagger.yaml")
 def serve_swagger_yaml():
     return send_from_directory("static", "swagger.yaml")
