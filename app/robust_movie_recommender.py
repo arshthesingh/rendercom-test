@@ -51,21 +51,56 @@ class MovieRecommender:
         self.sentiment_norm = (np.abs(self.sentiment) + 1e-8)
 
     def _compute_overview_embeddings(self):
-        """Compute or load the precomputed overview embeddings and normalize them."""
+        """
+        Compute or load the precomputed overview embeddings and normalize them
+        using memory mapping and chunked processing.
+        """
         if os.path.exists(self.embeddings_path):
             print("Loading precomputed overview embeddings with memory mapping...")
-            self.overview_embeddings = np.load(self.embeddings_path, mmap_mode='r')
-
+            # Load the embeddings using memory mapping (read-only)
+            overview_embeddings = np.load(self.embeddings_path, mmap_mode='r')
         else:
             print("Computing overview embeddings (this may take a while)...")
-            self.overview_embeddings = self.sbert_model.encode(
+            overview_embeddings = self.sbert_model.encode(
                 self.movies_data["overview"].tolist(),
                 show_progress_bar=True
             )
-            np.save(self.embeddings_path, self.overview_embeddings)
-        # Normalize embeddings for cosine similarity
-        norms = np.linalg.norm(self.overview_embeddings, axis=1, keepdims=True) + 1e-8
-        self.overview_normalized = self.overview_embeddings / norms
+            # Save the computed embeddings for future runs
+            np.save(self.embeddings_path, overview_embeddings)
+            # Re-load the saved embeddings using memory mapping
+            overview_embeddings = np.load(self.embeddings_path, mmap_mode='r')
+        
+        # Store the loaded embeddings if you need them later
+        self.overview_embeddings = overview_embeddings
+
+        # Normalize the embeddings in manageable chunks to reduce memory usage
+        self.overview_normalized = self._normalize_embeddings_in_chunks(overview_embeddings)
+
+
+    def _normalize_embeddings_in_chunks(self, embeddings, chunk_size=1000):
+        """
+        Normalize embeddings in chunks to avoid allocating a huge array all at once.
+
+        Parameters:
+            embeddings (np.array or memmap): The embeddings to normalize.
+            chunk_size (int): Number of rows to process at a time.
+
+        Returns:
+            np.array: A fully normalized array of embeddings.
+        """
+        num_rows = embeddings.shape[0]
+        # Preallocate an array for normalized embeddings (using float32 for lower memory usage)
+        normalized = np.empty(embeddings.shape, dtype=np.float32)
+        
+        for start in range(0, num_rows, chunk_size):
+            end = min(start + chunk_size, num_rows)
+            # Convert the chunk to a regular NumPy array if it's still memory mapped
+            chunk = np.array(embeddings[start:end])
+            # Compute the L2 norms and add a small epsilon to avoid division by zero
+            norms = np.linalg.norm(chunk, axis=1, keepdims=True) + 1e-8
+            normalized[start:end] = chunk / norms
+        return normalized
+
 
     def _prepare_faiss_index(self):
         """Build a FAISS index on the normalized overview embeddings."""
