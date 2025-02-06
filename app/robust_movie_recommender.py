@@ -47,7 +47,8 @@ class MovieRecommender:
         """
         if self.sbert_model is None:
             print("Loading transformer model...")
-            self.sbert_model = SentenceTransformer("all-mpnet-base-v2", device=self.device)
+            self.sbert_model = SentenceTransformer("all-MiniLM-L6-v2", device=self.device)
+
             print("Loading sentiment analyzer...")
             self.sentiment_analyzer = SentimentIntensityAnalyzer()
         
@@ -79,18 +80,18 @@ class MovieRecommender:
         self.overview_normalized = self._normalize_embeddings_in_chunks(overview_embeddings)
 
     def _normalize_embeddings_in_chunks(self, embeddings, chunk_size=1000):
-        """
-        Normalize embeddings in chunks to reduce peak memory usage.
-        """
         num_rows = embeddings.shape[0]
-        normalized = np.empty(embeddings.shape, dtype=np.float32)
+        # Use float16 to reduce memory usage by half compared to float32
+        normalized = np.empty(embeddings.shape, dtype=np.float16)
         for start in range(0, num_rows, chunk_size):
             end = min(start + chunk_size, num_rows)
-            # Convert the current chunk into a regular NumPy array if it's a memmap slice
             chunk = np.array(embeddings[start:end])
             norms = np.linalg.norm(chunk, axis=1, keepdims=True) + 1e-8
-            normalized[start:end] = chunk / norms
+            # Perform division in float32 then convert to float16
+            normalized_chunk = (chunk / norms).astype(np.float16)
+            normalized[start:end] = normalized_chunk
         return normalized
+
 
     def recommend(self,
                   movie_title: str,
