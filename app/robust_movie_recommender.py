@@ -53,8 +53,9 @@ class MovieRecommender:
     def _compute_overview_embeddings(self):
         """Compute or load the precomputed overview embeddings and normalize them."""
         if os.path.exists(self.embeddings_path):
-            print("Loading precomputed overview embeddings...")
-            self.overview_embeddings = np.load(self.embeddings_path)
+            print("Loading precomputed overview embeddings with memory mapping...")
+            self.overview_embeddings = np.load(self.embeddings_path, mmap_mode='r')
+
         else:
             print("Computing overview embeddings (this may take a while)...")
             self.overview_embeddings = self.sbert_model.encode(
